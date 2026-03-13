@@ -1,3 +1,3 @@
 title VOID-NUKE v1.0
 
-python main.py
+python multi_runner.py
