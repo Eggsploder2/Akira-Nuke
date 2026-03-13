@@ -1,105 +1,176 @@
-<div align="center">
+## Void Nuke – Multi-Token Test Harness
 
-<img src="https://i.imgur.com/mvQUQUr.png" alt="VOID-NUKE preview" width="780"/>
+This repository is a **fork/derivative** of the original `Void-Nuke` Discord tool, adapted for **multi-token testing** and **extra logging** so you can better understand how your own servers behave under destructive actions.
 
-<br><br>
-
-**v1.0.0** &nbsp;—&nbsp; by  **1s0e**
-
-<br>
-
-[![Discord](https://img.shields.io/badge/Discord-W6z9SQgvqc-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/W6z9SQgvqc)
-[![GitHub](https://img.shields.io/badge/GitHub-void4real-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dawa4real)
-![Python](https://img.shields.io/badge/Python-3.10+-CC0000?style=for-the-badge&logo=python&logoColor=white)
-![Platform](https://img.shields.io/badge/Windows-10%2F11-CC0000?style=for-the-badge&logo=windows&logoColor=white)
-
-<br>
-
-> *39 commands · full red TUI · single file · auto pub injection*
-
-</div>
-
-<br>
+> **Important**  
+> This code is powerful and destructive. Only use it on servers you own and control, and only for testing / auditing purposes. Misuse of this code against servers you do not own is likely to violate Discord's Terms of Service and may be illegal in your jurisdiction.
 
 ---
 
-## 🚀 Installation
+### Features
 
+- **Interactive CLI tool** (`main.py`)
+  - Connects a Discord bot and presents a menu of actions (nuke, mass ban, channel spam, etc.).
+  - Allows you to target one or more guilds the bot is a member of.
+
+- **Multi-token concurrent runner** (`multi_runner.py`)
+  - Launches **one `main.py` process per token** with shared settings.
+  - Lets you:
+    - Enter **multiple tokens once**.
+    - Choose `all` or specific guild IDs once.
+    - Choose **a single menu action code** once.
+  - Each token then runs that action concurrently on its own guilds (no repeated menus per bot).
+
+- **Action statistics log** (`void_nuke_stats.log`)
+  - Every tool action that calls `_summary` now writes a line like:
+    - `YYYY-MM-DD HH:MM:SS | <ActionName> | ok=<N> | err=<M> | <seconds>s`
+  - Useful for tracking how many operations succeeded/failed across runs.
+
+- **Message history logs** (`message_logs/`)
+  - Every non-bot message seen in a guild is appended to a guild-specific file:
+    - `message_logs/guild_<guild_id>.log`
+  - Each line includes timestamp, guild ID, channel ID, author ID, username, and plain-text content.
+  - Intended as a **safety net** to inspect or manually reconstruct messages if destructive actions are run on the wrong server.
+
+- **Optional webhook logger** (built-in)
+  - Original Void-Nuke webhook logger preserved:
+    - Can stream message activity to a chosen webhook for additional auditing.
+
+---
+
+### Project Layout
+
+- `main.py`  
+  Core CLI tool. Handles:
+  - Terminal UI, menu, and all raid/admin actions.
+  - Webhook-based logging (`webhook_logger`, `webhook_logger_check`).
+  - File-based message logging (`_file_message_logger`).
+  - Stats logging via `_summary`.
+  - Env-based startup:
+    - `VOIDNUKE_TOKEN` – bot token.
+    - `VOIDNUKE_SERVERS` – `"all"` or comma-separated guild IDs.
+    - `VOIDNUKE_ACTION` – optional menu code (e.g. `"01"`, `"33"`) for non-interactive use.
+
+- `multi_runner.py`  
+  Thin launcher that:
+  - Prompts for:
+    - `Enter bot tokens (comma-separated):`
+    - `server id(s) or all:`
+    - `menu action code (e.g. 01 for Nuke, 33 for Spam):`
+  - For each token:
+    - Spawns `python main.py` in a new process.
+    - Sets:
+      - `VOIDNUKE_TOKEN`
+      - `VOIDNUKE_SERVERS`
+      - `VOIDNUKE_ACTION`
+  - Each spawned process:
+    - Logs in with its token.
+    - Resolves guilds from `VOIDNUKE_SERVERS`.
+    - If `VOIDNUKE_ACTION` is set, runs that action on all matching guilds and exits **without showing menus**.
+
+- `README_VOID_FORK.md`  
+  Lower-level notes focused on the fork-specific changes; this `README.md` is the main GitHub-facing documentation.
+
+Other files and assets (artwork, original menu, etc.) come from the upstream Void-Nuke project.
+
+---
+
+### Installation
+
+1. **Clone / download** this repository.
+
+2. Ensure you have a recent **Python 3** (3.9+ recommended).
+
+3. Install Python dependencies:
+
+```bash
+pip install -U discord.py aiohttp colorama
 ```
-1 — python_installer.bat     checks Python
-2 — setup.bat                installs dependencies
-3 — start.bat                launches VOID-NUKE
+
+The code also uses these standard-library modules (no extra install required):  
+`os`, `sys`, `time`, `random`, `asyncio`, `json`, `re`, `webbrowser`, `urllib.request`, `datetime`, `shutil`.
+
+4. Create one or more **Discord bot tokens** in the [Discord Developer Portal](https://discord.com/developers/applications) and add the bot(s) to the guilds you want to test, with sufficient permissions for the actions you plan to run.
+
+---
+
+### Usage
+
+#### 1. Single Bot – Interactive Mode
+
+Run the core tool directly:
+
+```bash
+python main.py
 ```
 
-> **The bot must be in the target server with Administrator permissions.**
+You will be prompted for:
 
-<br>
+- `token` – your bot token.
+- `server id(s) or all` – either:
+  - `all` to include all guilds the bot is in, or
+  - a comma-separated list of guild IDs (e.g. `1234567890, 9876543210`).
 
----
+After connecting, you choose:
 
-## ⚠️ Required — Bot Intents
+- A **target server** from the list shown.
+- A **menu option code** from the ASCII menu (e.g. `01` = Nuke, `33` = Spam, etc.).
 
-Before running, you **must** enable these intents in the [Discord Developer Portal](https://discord.com/developers/applications) or the bot will crash on startup.
+Actions log their stats to `void_nuke_stats.log` automatically.
 
-**Steps:**
-1. Go to [discord.com/developers/applications](https://discord.com/developers/applications)
-2. Select your bot → **Bot** tab
-3. Scroll to **Privileged Gateway Intents**
-4. Enable the following:
+#### 2. Multiple Bots – Shared Action (Non-interactive)
 
-| Intent | Required |
-|--------|:--------:|
-| **Server Members Intent** | ✅ |
-| **Message Content Intent** | ✅ |
-| Presence Intent | ❌ not needed |
+Use the multi-runner:
 
-> Without these, commands like Ban All, Kick All, Mute All, Rename Members, etc. **will not work.**
+```bash
+python multi_runner.py
+```
 
-<br>
+Prompts:
 
----
+1. **Enter bot tokens (comma-separated):**  
+   Paste all the tokens you want to use, separated by commas.
 
-## 🎮 Navigation
+2. **server id(s) or all:**  
+   - `all` – each bot targets all guilds it is in.
+   - or a comma-separated list of guild IDs.
 
-| Key | Action |
-|:---:|--------|
-| `n` | Next page |
-| `b` | Previous page |
-| `01` – `39` | Run a command |
-| `q` | Quit |
+3. **menu action code (e.g. 01 for Nuke, 33 for Spam):**  
+   - The same number you’d type in the interactive menu.
 
-<br>
+For each token, `multi_runner.py` will:
 
----
-
-## 📟 Page 1 &nbsp;—&nbsp; Destroy / Members / Server
-
-| # | Command | # | Command | # | Command | # | Command |
-|:-:|---------|:-:|---------|:-:|---------|:-:|---------|
-| `01` | 💣 Nuke | `02` | ⚔️ Auto Raid | `03` | 🔨 Ban All | `04` | 👢 Kick All |
-| `05` | 🔇 Mute All | `06` | 🔓 Unban All | `07` | 🗑️ Del Channels | `08` | 😶 Del Emojis |
-| `09` | 🧹 Del Stickers | `10` | ➕ Create Channels | `11` | 🎭 Create Roles | `12` | 📂 Create Cats |
-| `13` | ✏️ Rename Channels | `14` | ✏️ Rename Roles | `15` | 🌐 Edit Server | `16` | 👤 Rename Members |
-| `17` | 🔡 Fix Nicks | `18` | 👑 Get Admin | `19` | 🎭 Impersonate | `20` | 👻 Ghost Ping |
-
-## 📟 Page 2 &nbsp;—&nbsp; Members / VC / Spam / Tools
-
-| # | Command | # | Command | # | Command | # | Command |
-|:-:|---------|:-:|---------|:-:|---------|:-:|---------|
-| `21` | ✂️ Strip Roles | `22` | 📨 Message All | `23` | 📬 DM Spam User | `24` | 🪝 Webhook Spam |
-| `25` | 📊 Server Info | `26` | 💾 Clone Server | `27` | 📡 Webhook Logs | `28` | 🔒 Lockdown |
-| `29` | 🔊 Sourdine VC | `30` | 🚪 Kick VC All | `31` | ↗️ Move All VC | `32` | 🔗 Invite Spam |
-| `33` | 💬 Spam | `34` | 🧵 Thread Spam | `35` | 😀 Reaction Spam | `36` | 🎙️ Voice Spam |
-| `37` | 👁️ Spoiler Spam | `38` | 📊 Poll Spam | `39` | 📅 Event Spam | `40` | 🚪 Quit |
-
-<br>
+- Spawn `main.py` in its own process.
+- Configure it via environment variables.
+- Let `main.py`:
+  - Log in,
+  - Resolve its list of guilds,
+  - Run the chosen action on all matching guilds,
+  - Exit when done (no extra prompts, no menu).
 
 ---
 
-<div align="center">
+### Logs and Recovery Aids
 
-**VOID-NUKE v1.0.0** &nbsp;—&nbsp; by 1s0e
+- **Action Stats – `void_nuke_stats.log`**
+  - One line per completed action.
+  - Helps you see how many entities were touched and how many failed.
 
-[discord.gg/W6z9SQgvqc](https://discord.gg/W6z9SQgvqc) &nbsp;·&nbsp; [github.com/void4real](https://github.com/dawa4real)
+- **Message History – `message_logs/guild_<guild_id>.log`**
+  - Contains all non-bot messages seen in that guild while the bot was running.
+  - Intended as a reference for manual reconstruction (e.g., re-posting chats) if a destructive action is mistakenly run on the wrong server.
 
-</div>
+- **Webhook Logger (optional)**
+  - Via the menu option for webhook logs, you can forward activity to a Discord webhook as well.
+
+---
+
+### Safety & Responsibility
+
+- Do **not** use this tool on servers you do not own or administer.
+- Be mindful of **Discord rate limits** and terms of service.
+- Consider running on **test servers** that mirror your real configuration to avoid accidental damage.
+- Keep your **bot tokens secret**; never commit them or share them publicly.
+
+This repository is provided for educational and testing purposes only. You are solely responsible for how you use it.
+
