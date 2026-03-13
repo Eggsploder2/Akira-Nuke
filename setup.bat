@@ -4,4 +4,4 @@ pip install discord.py
 pip install aiohttp
 pip install colorama
 
-python main.py
+python multi_runner.py
